@@ -8,6 +8,20 @@ import sys
 import platform as PLATFORM
 from waflib.Build import BuildContext
 import waflib.Utils as Utils
+import wscript_configure_override
+
+def configure(ctx):
+    import sys
+
+    # Force waf to treat this as a GCC build and not MSVC
+    ctx.env.DEST_OS = 'linux'  # Trick waf into avoiding MSVC logic
+    ctx.env.CC = '/mingw64/bin/gcc'
+    ctx.env.CXX = '/mingw64/bin/g++'
+
+    # Make waf think we're not on Windows so it avoids /nologo tests
+    if sys.platform == 'win32':
+        sys.platform = 'linux'
+
 
 # Fixup OSX 10.5/10.6 builds
 # prefer gcc, g++ 4.x over ancient clang-1.5
@@ -15,6 +29,7 @@ from waflib.Tools.compiler_c import c_compiler
 from waflib.Tools.compiler_cxx import cxx_compiler
 c_compiler['darwin'] = ['gcc', 'clang' ]
 cxx_compiler['darwin'] = ['g++', 'clang++' ]
+
 
 class i18n(BuildContext):
     cmd = 'i18n'
@@ -971,6 +986,7 @@ def options(opt):
                     help='Additional include directory where header files can be found (split multiples with commas)')
     opt.add_option('--also-libdir', type='string', action='store', dest='also_libdir', default='',
                     help='Additional include directory where shared libraries can be found (split multiples with commas)')
+    opt.add_option('--disable-werror', action='store_true', help='Disable treating warnings as errors')
     opt.add_option('--noconfirm', action='store_true', default=False, dest='noconfirm',
                     help='Do not ask questions that require confirmation during the build')
     opt.add_option('--cxx11', action='store_true', default=False, dest='cxx11',
@@ -1018,6 +1034,9 @@ def configure(conf):
         conf.env['MSVC_TARGETS'] = ['x64']
         conf.load('msvc')
 
+    if not conf.options.disable_werror:
+        conf.env.append_value('CFLAGS', ['-Werror'])
+
     if Options.options.debug and not Options.options.keepflags:
         # Nuke user CFLAGS/CXXFLAGS if debug is set (they likely contain -O3, NDEBUG, etc)
         conf.env['CFLAGS'] = []
@@ -1059,6 +1078,7 @@ def configure(conf):
         preflib = ''.join ([ '-L', user_gtk_root + '/lib'])
         conf.env.append_value('CFLAGS', [ prefinclude ])
         conf.env.append_value('CXXFLAGS',  [prefinclude ])
+        conf.env.append_value('CXXFLAGS', ['-Wno-dangling-pointer'])
         conf.env.append_value('LINKFLAGS', [ preflib ])
         autowaf.display_msg(conf, 'Will build against private GTK dependency stack in ' + user_gtk_root, 'yes')
         conf.env['DEPSTACK_REV'] = get_depstack_rev (user_gtk_root)

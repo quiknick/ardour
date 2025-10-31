@@ -86,9 +86,9 @@ PBD::init ()
 	}
 #endif
 
-	if (!Glib::thread_supported()) {
-		Glib::thread_init();
-	}
+	//if (!Glib::thread_supported()) {
+	//	Glib::thread_init();
+	//}
 
 	Gio::init ();
 
