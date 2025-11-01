@@ -15,12 +15,16 @@ def configure(ctx):
 
     # Force waf to treat this as a GCC build and not MSVC
     ctx.env.DEST_OS = 'linux'  # Trick waf into avoiding MSVC logic
-    ctx.env.CC = '/mingw64/bin/gcc'
-    ctx.env.CXX = '/mingw64/bin/g++'
+    ctx.env.CC = 'gcc'
+    ctx.env.CXX = 'g++'
 
     # Make waf think we're not on Windows so it avoids /nologo tests
     if sys.platform == 'win32':
         sys.platform = 'linux'
+
+    # Prevent any MSVC tool loading
+    ctx.env['MSVC_COMPILER'] = False
+    ctx.env['MSVC_INSTALLED_VERSIONS'] = []
 
 
 # Fixup OSX 10.5/10.6 builds
