@@ -43,6 +43,8 @@ tags
 .waf-*
 .waf3-*
 .lock-waf*
+.waflock
+/waf3-*
 /build/
 /.cache
 /doc/html/
