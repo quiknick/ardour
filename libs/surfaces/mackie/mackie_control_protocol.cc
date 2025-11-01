@@ -1581,6 +1581,10 @@ MackieControlProtocol::build_device_specific_button_map()
 		DEFINE_BUTTON_HANDLER (Button::Marker, &MackieControlProtocol::flip_window_press, &MackieControlProtocol::flip_window_release);
 	}
 
+	if (_device_info.is_v1m()) {
+		DEFINE_BUTTON_HANDLER (Button::Marker, &MackieControlProtocol::flip_window_press, &MackieControlProtocol::flip_window_release);
+	}
+
 	if(_device_info.is_proG2()) {
 		DEFINE_BUTTON_HANDLER (Button::View, &MackieControlProtocol::user_press, &MackieControlProtocol::user_release);
 		DEFINE_BUTTON_HANDLER (Button::Trim, &MackieControlProtocol::send_press, &MackieControlProtocol::send_release);

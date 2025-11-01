@@ -204,6 +204,8 @@ public:
 	int set_state (const XMLNode&, int version);
 
 	bool get_qcon_flag() { return is_qcon; }
+	
+	bool get_v1_flag() { return is_v1m; }
 
 	void toggle_master_monitor ();
 	bool master_stripable_is_master_monitor ();
@@ -255,6 +257,12 @@ public:
 	MidiByteArray display_line (std::string const& msg, int line_num);
 	MidiByteArray display_colors_on_xtouch (const XTouchColors color_values[]) const;
 	uint8_t convert_color_to_xtouch_value (uint32_t color) const;
+	
+	// v1m Flag;
+	bool is_v1m;
+
+        /** Send RGB colors to V1-M scribble strips (Icon-specific SysEx) */
+	MidiByteArray display_colors_on_v1m (const uint8_t rgb_values[24]) const;  // 8 strips × 3 bytes
 
   public:
 	/* IP MIDI devices need to keep a handle on this and destroy it */
