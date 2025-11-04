@@ -8,6 +8,7 @@ import sys
 import platform as PLATFORM
 from waflib.Build import BuildContext
 import waflib.Utils as Utils
+import wscript_configure_override
 
 # Fixup OSX 10.5/10.6 builds
 # prefer gcc, g++ 4.x over ancient clang-1.5
@@ -912,6 +913,7 @@ def options(opt):
                     help='Additional include directory where header files can be found (split multiples with commas)')
     opt.add_option('--also-libdir', type='string', action='store', dest='also_libdir', default='',
                     help='Additional include directory where shared libraries can be found (split multiples with commas)')
+    opt.add_option('--disable-werror', action='store_true', help='Disable treating warnings as errors')
     opt.add_option('--noconfirm', action='store_true', default=False, dest='noconfirm',
                     help='Do not ask questions that require confirmation during the build')
     opt.add_option('--cxx17', action='store_true', default=False, dest='cxx17',
@@ -957,6 +959,9 @@ def configure(conf):
         conf.env['MSVC_TARGETS'] = ['x64']
         conf.load('msvc')
 
+    if not conf.options.disable_werror:
+        conf.env.append_value('CFLAGS', ['-Werror'])
+
     if Options.options.debug and not Options.options.keepflags:
         # Nuke user CFLAGS/CXXFLAGS if debug is set (they likely contain -O3, NDEBUG, etc)
         conf.env['CFLAGS'] = []
@@ -1000,6 +1005,7 @@ def configure(conf):
         preflib = ''.join ([ '-L', user_gtk_root + '/lib'])
         conf.env.append_value('CFLAGS', [ prefinclude ])
         conf.env.append_value('CXXFLAGS',  [prefinclude ])
+        conf.env.append_value('CXXFLAGS', ['-Wno-dangling-pointer'])
         conf.env.append_value('LINKFLAGS', [ preflib ])
         autowaf.display_msg(conf, 'Will build against private GTK dependency stack in ' + user_gtk_root, 'yes')
         conf.env['DEPSTACK_REV'] = get_depstack_rev (user_gtk_root)

@@ -21,6 +21,7 @@
 #include <errno.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <ltc.h>
 
 #include "pbd/error.h"
 #include "pbd/failed_constructor.h"
