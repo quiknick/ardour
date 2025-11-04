@@ -1,0 +1,48 @@
+#!/usr/bin/env python
+
+import os
+import sys
+
+def options(opt):
+    pass
+
+def configure(conf):
+    # Check for ASIO SDK header presence
+#    if not conf.check(header_name='asio.h', includes=['../../asiosdk/common'], mandatory=False):
+#        conf.define('HAVE_ASIO', 0)
+#        return
+
+#    conf.define('HAVE_ASIO', 1)
+
+    sdk_dir = conf.path.find_dir('../../asiosdk/common')
+    if sdk_dir:
+        inc = sdk_dir.abspath()
+    else:
+        inc = None
+    conf.msg("ASIO include dir", inc or "not found")
+    if not inc or not conf.check(header_name='asio.h', includes=[inc], mandatory=False):
+        conf.define('HAVE_ASIO', 0)
+        return
+    conf.define('HAVE_ASIO', 1)
+
+def build(bld):
+    if not bld.env['HAVE_ASIO']:
+        return
+
+    obj = bld.shlib(
+        target='asio',
+        source=[
+            'asiodrivers.cpp'
+        ],
+        includes=[
+            '.',
+            '../../asiosdk/common'
+        ],
+        defines=['HAVE_ASIO'],
+        name='asio_backend',
+        install_path=None,
+        use='ardour backend'
+    )
+
+    bld.env['BACKEND_ASIO'] = obj
+
