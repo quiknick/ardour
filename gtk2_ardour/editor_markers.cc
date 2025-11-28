@@ -1872,15 +1872,14 @@ Editor::edit_location (Location& loc, bool with_scene, bool with_command)
 	} else if (loc.is_range()) {
 		dialog.set_title (string_compose (_("%1 Range"), verb));
 	} else {
-		dialog.set_title (string_compose (_("%1 Mark"), verb));
+		dialog.set_title (string_compose (_("%1 Marker"), verb));
 	}
 
 	dialog.set_name ("MarkRenameWindow");
 	dialog.set_size_request (250, -1);
-	dialog.set_position (Gtk::WIN_POS_MOUSE);
+	dialog.set_position (UIConfiguration::instance().get_default_window_position());
 
 	dialog.add_button (verb, RESPONSE_ACCEPT);
-	dialog.set_response_sensitive (Gtk::RESPONSE_ACCEPT, false);
 	dialog.set_initial_text (loc.name());
 
 	Gtk::Adjustment* program_adjust (nullptr);

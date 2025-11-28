@@ -25,9 +25,7 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <sys/time.h>
 #include <errno.h>
-#include <unistd.h>
 #include <algorithm>
 
 #include <sndfile.h>
@@ -61,7 +59,6 @@
 #include "editing.h"
 #include "audio_time_axis.h"
 #include "midi_time_axis.h"
-#include "session_import_dialog.h"
 #include "tempo_map_change.h"
 #include "gui_thread.h"
 #include "interthread_progress_window.h"
@@ -143,13 +140,6 @@ Editor::external_audio_dialog ()
 	}
 
 	sfbrowser->show_all ();
-}
-
-void
-Editor::session_import_dialog ()
-{
-	SessionImportDialog dialog (_session);
-	dialog.run ();
 }
 
 typedef std::map<PBD::ID,std::shared_ptr<ARDOUR::Source> > SourceMap;

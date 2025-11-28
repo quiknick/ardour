@@ -30,8 +30,6 @@
 
 /* Note: public Editor methods are documented in public_editor.h */
 
-#include <unistd.h>
-
 #include <cstdlib>
 #include <cmath>
 #include <string>
@@ -1766,53 +1764,6 @@ Editor::scroll_up_one_track (bool skip_child_views)
 	return false;
 }
 
-void
-Editor::scroll_left_step ()
-{
-	samplepos_t xdelta = (current_page_samples() / 8);
-
-	if (_leftmost_sample > xdelta) {
-		reset_x_origin (_leftmost_sample - xdelta);
-	} else {
-		reset_x_origin (0);
-	}
-}
-
-
-void
-Editor::scroll_right_step ()
-{
-	samplepos_t xdelta = (current_page_samples() / 8);
-
-	if (max_samplepos - xdelta > _leftmost_sample) {
-		reset_x_origin (_leftmost_sample + xdelta);
-	} else {
-		reset_x_origin (max_samplepos - current_page_samples());
-	}
-}
-
-void
-Editor::scroll_left_half_page ()
-{
-	samplepos_t xdelta = (current_page_samples() / 2);
-	if (_leftmost_sample > xdelta) {
-		reset_x_origin (_leftmost_sample - xdelta);
-	} else {
-		reset_x_origin (0);
-	}
-}
-
-void
-Editor::scroll_right_half_page ()
-{
-	samplepos_t xdelta = (current_page_samples() / 2);
-	if (max_samplepos - xdelta > _leftmost_sample) {
-		reset_x_origin (_leftmost_sample + xdelta);
-	} else {
-		reset_x_origin (max_samplepos - current_page_samples());
-	}
-}
-
 /* ZOOM */
 
 void
@@ -1925,7 +1876,7 @@ Editor::choose_new_marker_name(string &name, bool is_range) {
 
 	dialog.set_name ("MarkNameWindow");
 	dialog.set_size_request (250, -1);
-	dialog.set_position (Gtk::WIN_POS_MOUSE);
+	dialog.set_position (UIConfiguration::instance().get_default_window_position());
 
 	dialog.add_button (Stock::OK, RESPONSE_ACCEPT);
 	dialog.set_initial_text (name);
@@ -4119,7 +4070,7 @@ Editor::bounce_range_selection (BounceTarget target, bool with_processing)
 
 		dialog.set_name ("BounceNameWindow");
 		dialog.set_size_request (400, -1);
-		dialog.set_position (Gtk::WIN_POS_MOUSE);
+		dialog.set_position (UIConfiguration::instance().get_default_window_position());
 
 		dialog.add_button (_("Bounce"), RESPONSE_ACCEPT);
 		dialog.set_initial_text (bounce_name);
@@ -8594,7 +8545,7 @@ Editor::start_visual_state_op (uint32_t n)
 {
 	save_visual_state (n);
 
-	PopUp* pup = new PopUp (WIN_POS_MOUSE, 1000, true);
+	PopUp* pup = new PopUp (UIConfiguration::instance().get_default_window_position(), 1000, true);
 	char buf[32];
 	snprintf (buf, sizeof (buf), _("Saved view %u"), n+1);
 	pup->set_text (buf);

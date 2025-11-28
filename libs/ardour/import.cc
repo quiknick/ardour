@@ -29,7 +29,6 @@
 #include <string>
 #include <climits>
 #include <cerrno>
-#include <unistd.h>
 #include <sys/stat.h>
 #include <time.h>
 #include <stdint.h>
@@ -402,6 +401,11 @@ write_midi_type0_data_to_one_file (Evoral::SMF* source, ImportStatus& status, si
 
 			if (size == 0) {
 				/* metadata not meant for us */
+				continue;
+			}
+
+			if (ret == 0) {
+				/* set note id, but we ignored it */
 				continue;
 			}
 

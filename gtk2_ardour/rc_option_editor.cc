@@ -2922,7 +2922,7 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (_("Appearance/Application Bar"),
 	     new BoolOption (
 		     "show-toolbar-latency",
-		     _("Plugin Delay Compensation"),
+		     _("Display Plugin Delay Compensation Control and Info"),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_toolbar_latency),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_toolbar_latency)
 		     ));
@@ -3124,7 +3124,7 @@ These settings will only take effect after %1 is restarted.\n\
 #if !(defined PLATFORM_WINDOWS || defined __APPLE__)
 	bo = new BoolOption (
 			"allow-to-resize-engine-dialog",
-			_("Allow to resize Engine Dialog"),
+			_("Allow resizing the audio/MIDI setup dialog"),
 			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_allow_to_resize_engine_dialog),
 			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_allow_to_resize_engine_dialog)
 			);
@@ -3190,6 +3190,18 @@ These settings will only take effect after %1 is restarted.\n\
 	Gtkmm2ext::UI::instance()->set_tip (bgo->tip_widget(), string_compose (_("Disables hardware gradient rendering on buggy video drivers (\"buggy gradients patch\").\nThis requires restarting %1 before having an effect"), PROGRAM_NAME));
 	add_option (_("Appearance"), bgo);
 #endif
+
+	ComboOption<Gtk::WindowPosition>* winpos = new ComboOption<Gtk::WindowPosition> (
+		     "default-window-position",
+		     _("Default location of new windows"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_default_window_position),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_default_window_position)
+		     );
+	winpos->add (Gtk::WIN_POS_CENTER, _("Center of screen"));
+	winpos->add (Gtk::WIN_POS_MOUSE, _("Mouse position"));
+	winpos->add (Gtk::WIN_POS_CENTER_ALWAYS, _("Center of screen, really"));
+	winpos->add (Gtk::WIN_POS_CENTER_ON_PARENT, _("Center of parent window"));
+	add_option (_("Appearance"), winpos);
 
 #if ENABLE_NLS
 
@@ -4054,7 +4066,7 @@ These settings will only take effect after %1 is restarted.\n\
 
 	bo = new BoolOption (
 			"discover-plugins-on-start",
-			_("Scan for [new] Plugins on Application Start"),
+			_("Scan for [New] Plugins on Application Start"),
 			sigc::mem_fun (*_rc_config, &RCConfiguration::get_discover_plugins_on_start),
 			sigc::mem_fun (*_rc_config, &RCConfiguration::set_discover_plugins_on_start)
 			);
@@ -4122,6 +4134,14 @@ These settings will only take effect after %1 is restarted.\n\
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_open_gui_after_adding_plugin)
 		     ));
 
+	add_option (_("Plugins/GUI"),
+	     new BoolOption (
+		     "open-gui-after-creating-instrument-track",
+		     _("Automatically open instrument plugin GUI when adding a new MIDI Track/Bus"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_open_gui_after_creating_instrument_track),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_open_gui_after_creating_instrument_track)
+		     ));
+
 	bo = new BoolOption (
 		"one-plugin-window-only",
 		_("Show only one plugin window at a time"),
@@ -4162,6 +4182,35 @@ These settings will only take effect after %1 is restarted.\n\
 			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_prefer_inline_over_gui)
 			);
 	add_option (_("Plugins/GUI"), _plugin_prefer_inline);
+#endif
+
+#ifdef VST3_SUPPORT
+	add_option (_("Plugins/GUI"), new OptionEditorHeading (_("VST3 UI")));
+
+	add_option (_("Plugins/GUI"),
+	     new BoolOption (
+		     "show-vst3-micro-edit-inline",
+		     _("Automatically show 'Micro Edit' tagged controls on the mixer-strip"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_show_vst3_micro_edit_inline),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_show_vst3_micro_edit_inline)
+		     ));
+
+		ComboOption<VST3KnobMode>* v3km = new ComboOption<VST3KnobMode> (
+				"vst3-knob-mode",
+				_("VST3 Knob Mode"),
+				sigc::mem_fun (*_rc_config, &RCConfiguration::get_vst3_knob_mode),
+				sigc::mem_fun (*_rc_config, &RCConfiguration::set_vst3_knob_mode)
+				);
+
+		v3km->add (VST3KnobPluginDefault, _("Plugin Default"));
+		v3km->add (VST3KnobCircularMode, _("Circular with jump to clicked position (discouraged)"));
+		v3km->add (VST3KnobRelativCircularMode, _("Circular without jump to clicked position"));
+		v3km->add (VST3KnobLinearMode, _("Linear: depending on vertical movement"));
+
+		v3km->set_note (_("These settings apply to new VST3 plugin instances only.\nAlready loaded plugins retain the previous setting."));
+
+		add_option (_("Plugins/GUI"), v3km);
+
 #endif
 
 
@@ -4295,15 +4344,6 @@ These settings will only take effect after %1 is restarted.\n\
 	                       "<a href=\"https://steinbergmedia.github.io/vst3_dev_portal/pages/Technical+Documentation/Locations+Format/Plugin+Locations.html\">specification</a> "
 	                       "are always searched, and need not be explicitly set."));
 	add_option (_("Plugins/VST"), vst3_path);
-
-	// -> Appearance/Mixer ?
-	add_option (_("Plugins/VST"),
-	     new BoolOption (
-		     "show-vst3-micro-edit-inline",
-		     _("Automatically show 'Micro Edit' tagged controls on the mixer-strip"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_show_vst3_micro_edit_inline),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_show_vst3_micro_edit_inline)
-		     ));
 
 #if (defined WINDOWS_VST_SUPPORT || defined MACVST_SUPPORT || defined LXVST_SUPPORT)
 	add_option (_("Plugins/VST"), new OptionEditorHeading (_("VST2/VST3")));
@@ -4874,7 +4914,7 @@ These settings will only take effect after %1 is restarted.\n\
 
 	ComboOption<uint32_t>* rta = new ComboOption<uint32_t> (
 	  "max-active-rta",
-	  _("Limit concurrent RTA specta"),
+	  _("Limit concurrent RTA spectra"),
 	  sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_max_active_rta),
 	  sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_max_active_rta)
 		);
@@ -4883,7 +4923,7 @@ These settings will only take effect after %1 is restarted.\n\
 	rta->add (12, _("12"));
 	rta->add (16, _("16 (fast CPUs)"));
 	rta->add (16, _("20 (very fast CPUs)"));
-	rta->add ( 0, _("No Limt"));
+	rta->add ( 0, _("No Limit"));
 
 	add_option (S_("Preferences|Metering"), rta);
 

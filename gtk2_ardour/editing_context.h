@@ -123,6 +123,11 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 	virtual void stop_canvas_autoscroll () = 0;
 	virtual bool autoscroll_active() const = 0;
 
+	void scroll_left_step ();
+	void scroll_right_step ();
+	void scroll_left_half_page ();
+	void scroll_right_half_page ();
+
 	virtual void redisplay_grid (bool immediate_redraw) = 0;
 	virtual Temporal::timecnt_t get_nudge_distance (Temporal::timepos_t const & pos, Temporal::timecnt_t& next) const = 0;
 
@@ -528,6 +533,8 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 	Glib::RefPtr<Gtk::ActionGroup> zoom_actions;
 
 	virtual void load_shared_bindings ();
+
+	virtual Gtk::Window* transient_parent () = 0;
 
 	Editing::GridType  pre_internal_grid_type;
 	Editing::SnapMode  pre_internal_snap_mode;

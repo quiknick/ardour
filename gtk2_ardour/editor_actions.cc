@@ -354,7 +354,7 @@ Editor::register_actions ()
 	reg_sens (editor_actions, "set-punch-from-edit-range", _("Set Punch from Selection"), sigc::mem_fun(*this, &Editor::set_punch_from_selection));
 	reg_sens (editor_actions, "set-session-from-edit-range", _("Set Session Start/End from Selection"), sigc::mem_fun(*this, &Editor::set_session_extents_from_selection));
 
-	reg_sens (editor_actions, "find-and-display-stripable", _("Find & Display Track/Bus"), sigc::mem_fun (*this, &Editor::find_and_display_track));
+	reg_sens (editor_actions, "find-and-display-stripable", _("Find & Display Track/Bus..."), sigc::mem_fun (*this, &Editor::find_and_display_track));
 
 	if (Profile->get_mixbus ()) {
 		reg_sens (editor_actions, "copy-paste-section", _("Copy/Paste Range Section to Playhead"), sigc::bind (sigc::mem_fun(*this, &Editor::cut_copy_section), CopyPasteSection));
@@ -652,7 +652,7 @@ Editor::register_actions ()
 
 	ActionManager::register_action (rl_actions, X_("removeUnusedRegions"), _("Remove Unused"), sigc::mem_fun (*_regions, &EditorRegions::remove_unused_regions));
 
-	act = reg_sens (editor_actions, X_("addExistingPTFiles"), _("Import PT session"), sigc::mem_fun (*this, &Editor::external_pt_dialog));
+	act = reg_sens (editor_actions, X_("addExistingPTFiles"), _("Import PT session..."), sigc::mem_fun (*this, &Editor::external_pt_dialog));
 	ActionManager::write_sensitive_actions.push_back (act);
 
 	act = reg_sens (editor_actions, X_("LoudnessAssistant"), _("Loudness Assistant..."), sigc::bind (sigc::mem_fun (*this, &Editor::loudness_assistant), false));
@@ -662,10 +662,6 @@ Editor::register_actions ()
 
 	act = reg_sens (editor_actions, X_("addExternalAudioToRegionList"), _("Import to Source List..."), sigc::bind (sigc::mem_fun(*this, &Editor::add_external_audio_action), ImportAsRegion));
 	ActionManager::write_sensitive_actions.push_back (act);
-
-	act = ActionManager::register_action (editor_actions, X_("importFromSession"), _("Import from Session"), sigc::mem_fun(*this, &Editor::session_import_dialog));
-	ActionManager::write_sensitive_actions.push_back (act);
-
 
 	act = ActionManager::register_action (editor_actions, X_("bring-into-session"), _("Bring all media into session folder"), sigc::mem_fun(*this, &Editor::bring_all_sources_into_session));
 	ActionManager::write_sensitive_actions.push_back (act);
@@ -1541,10 +1537,13 @@ Editor::automation_end_edit ()
 	AutomationTimeAxisView* atv = dynamic_cast<AutomationTimeAxisView*> (entered_track);
 
 	if (!atv) {
+		ARDOUR_UI::instance()->Escape ();
 		return;
 	}
 
-	atv->line()->end_edit ();
+	if (!atv->line()->end_edit ()) {
+		ARDOUR_UI::instance()->Escape ();
+	}
 }
 
 void

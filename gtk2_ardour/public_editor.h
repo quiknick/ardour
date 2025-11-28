@@ -156,7 +156,6 @@ public:
 
 	/* import dialogs -> ardour-ui ?! */
 	virtual void external_audio_dialog () = 0;
-	virtual void session_import_dialog () = 0;
 
 	virtual void new_region_from_selection () = 0;
 	virtual void separate_region_from_selection () = 0;
@@ -241,10 +240,10 @@ public:
 	/** Open stem export dialog */
 	virtual void stem_export () = 0;
 
-	/** Open export dialog with current selection pre-selected */
+	/** Open export dialog with current selection preselected */
 	virtual void export_selection () = 0;
 
-	/** Open export dialog with current range pre-selected */
+	/** Open export dialog with current range preselected */
 	virtual void export_range () = 0;
 
 	/** Open Simple Export Dialog */
@@ -455,6 +454,8 @@ protected:
 	virtual void _commit_tempo_map_edit (Temporal::TempoMap::WritableSharedPtr&, bool with_update) = 0;
 
 	std::atomic<int> _suspend_route_redisplay_counter;
+
+	Gtk::Window* transient_parent () { return current_toplevel (); }
 };
 
 class DisplaySuspender {

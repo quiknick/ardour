@@ -344,12 +344,6 @@ public:
 	bool scroll_up_one_track (bool skip_child_views = false);
 	bool scroll_down_one_track (bool skip_child_views = false);
 
-	void scroll_left_step ();
-	void scroll_right_step ();
-
-	void scroll_left_half_page ();
-	void scroll_right_half_page ();
-
 	void select_topmost_track ();
 
 	void cleanup_regions ();
@@ -761,6 +755,7 @@ private:
 	void initial_display ();
 	void add_stripables (ARDOUR::StripableList&);
 	void add_routes (ARDOUR::RouteList&);
+	void add_instrument_routes (ARDOUR::RouteList&);
 	void timeaxisview_deleted (TimeAxisView*);
 	void add_vcas (ARDOUR::VCAList&);
 
@@ -1311,7 +1306,6 @@ private:
 
 	/* import & embed */
 	void external_audio_dialog ();
-	void session_import_dialog ();
 
 	/* PT import specific */
 	void external_pt_dialog ();
@@ -1578,6 +1572,7 @@ private:
 
 	void set_visible_marker_types (MarkerBarType);
 	void set_visible_range_types (RangeBarType);
+	void maybe_show_instrument_plugin (std::shared_ptr<ARDOUR::MidiTrack> mt);
 
 protected:
 	void _commit_tempo_map_edit (Temporal::TempoMap::WritableSharedPtr&, bool with_update = false);

@@ -60,6 +60,7 @@
 #include "pbd/statefuldestructible.h"
 #include "pbd/signals.h"
 #include "pbd/undo.h"
+#include "pbd/uuid.h"
 
 #ifdef USE_TLSF
 #  include "pbd/tlsf.h"
@@ -233,6 +234,7 @@ public:
 	 * internal, not user-visible IDs */
 	static unsigned int next_name_id ();
 
+	std::string uuid() const { return _uuid.to_s(); }
 	std::string path() const { return _path; }
 	std::string name() const { return _name; }
 	std::string snap_name() const { return _current_snapshot_name; }
@@ -458,6 +460,10 @@ public:
 	PBD::Signal<void()> Located;
 
 	PBD::Signal<void(RouteList&)> RouteAdded;
+	/* This is emitted after one or more routes are added that are actually
+	   Tracks with an instrument plugin.
+	*/
+	PBD::Signal<void(RouteList&)> InstrumentRouteAdded;
 	/** Emitted when a property of one of our route groups changes.
 	 *  The parameter is the RouteGroup that has changed.
 	 */
@@ -488,6 +494,8 @@ public:
 	void request_roll (TransportRequestSource origin = TRS_UI);
 	void request_stop (bool abort = false, bool clear_state = false, TransportRequestSource origin = TRS_UI);
 	void request_locate (samplepos_t sample, bool force = false, LocateTransportDisposition ltd = RollIfAppropriate, TransportRequestSource origin = TRS_UI);
+
+	bool request_locate_to_mark (std::string const&, LocateTransportDisposition ltd = RollIfAppropriate, TransportRequestSource origin = TRS_UI);
 
 	void request_play_loop (bool yn, bool leave_rolling = false);
 	bool get_play_loop () const { return play_loop; }
@@ -656,7 +664,17 @@ public:
 	std::vector<std::string> possible_states() const;
 	static std::vector<std::string> possible_states (std::string path);
 
-	bool export_track_state (std::shared_ptr<RouteList> rl, const std::string& path);
+
+	enum RouteGroupImportMode {
+		IgnoreRouteGroup,
+		UseRouteGroup,
+		CreateRouteGroup
+	};
+
+	bool export_route_state (std::shared_ptr<RouteList> rl, const std::string& path, bool with_sources);
+	int  import_route_state (const std::string& path, std::map<PBD::ID, PBD::ID> const&, RouteGroupImportMode rgim = CreateRouteGroup);
+
+	std::map<PBD::ID, std::string> parse_route_state (const std::string& path, bool& match_pbd_id);
 
 	/// The instant xml file is written to the session directory
 	void add_instant_xml (XMLNode&, bool write_to_config = true);
@@ -1551,6 +1569,7 @@ private:
 	bool maybe_stop (samplepos_t limit);
 	bool maybe_sync_start (pframes_t &);
 
+	PBD::UUID               _uuid;
 	std::string             _path;
 	std::string             _name;
 	bool                    _is_new;
