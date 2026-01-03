@@ -40,6 +40,7 @@ RegionUISettings::RegionUISettings ()
 	, snap_mode (Editing::SnapMagnetic)
 	, zoom_focus (ZoomFocusLeft)
 	, mouse_mode (MouseContent)
+	, note_mode (ARDOUR::Sustained)
 	, x_origin (0)
 	, recording_length (1, 0, 0)
 	, width (-1)
@@ -65,6 +66,7 @@ RegionUISettings::get_state () const
 	node->set_property (X_("snap-mode"), snap_mode);
 	node->set_property (X_("zoom-focus"), zoom_focus);
 	node->set_property (X_("mouse-mode"), mouse_mode);
+	node->set_property (X_("note-mode"), note_mode);
 	node->set_property (X_("x-origin"), x_origin);
 	node->set_property (X_("recording_length"), recording_length);
 
@@ -95,6 +97,7 @@ RegionUISettings::set_state (XMLNode const & state, int)
 	state.get_property (X_("snap-mode"), snap_mode);
 	state.get_property (X_("zoom-focus"), zoom_focus);
 	state.get_property (X_("mouse-mode"), mouse_mode);
+	state.get_property (X_("note-mode"), note_mode);
 	state.get_property (X_("x-origin"), x_origin);
 	state.get_property (X_("recording_length"), recording_length);
 
@@ -171,15 +174,12 @@ RegionUISettingsManager::load (std::string const & xmlpath)
 	}
 
 	if (!state_tree.read (xmlpath)) {
-		std::cerr << "bad xmlpath " << xmlpath << std::endl;
 		return -1;
 	}
-	std::cerr << "loading " << xmlpath << std::endl;
 
 	XMLNode const & root (*state_tree.root());
 
 	if (root.name() != X_("RegionUISettings")) {
-		std::cerr << "bad root\n";
 		return -1;
 	}
 
@@ -187,8 +187,6 @@ RegionUISettingsManager::load (std::string const & xmlpath)
 		RegionUISettings rsu;
 		PBD::ID id;
 		node->get_property ("id", id);
-
-		std::cerr << "loaded RSU for " << id << std::endl;
 
 		if (rsu.set_state (*node, 0) == 0) {
 			insert (std::make_pair (id, rsu));

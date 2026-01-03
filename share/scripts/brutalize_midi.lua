@@ -1,7 +1,7 @@
 ardour { ["type"] = "EditorAction", name = "Brutalize MIDI",
 	license     = "MIT",
 	author      = "Ardour Team",
-	description = [[Randomize MIDI Note position (de-quantize).]]
+	description = [[Randomize MIDI Note position (de-quantize) of selected MIDI regions.]]
 }
 
 function factory () return function ()
@@ -58,7 +58,7 @@ function factory () return function ()
 
 			-- ..generate random offset..
 			local tickdiff = math.floor (rv['rand']() * max_distance);
-			print (old_pos:get_beats (), old_pos:get_ticks (), tickdiff)
+			--print (old_pos:get_beats (), old_pos:get_ticks (), tickdiff)
 
 			-- .. and calculate new position.
 			local new_pos = Temporal.Beats (old_pos:get_beats (), old_pos:get_ticks () + tickdiff)

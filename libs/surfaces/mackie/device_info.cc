@@ -366,6 +366,18 @@ DeviceInfo::set_state (const XMLNode& node, int /* version */)
 		_is_platformMp = false;
 	}
 
+	if ((child = node.child ("IsP1M")) != 0) {
+		child->get_property ("value", _is_p1m);
+	} else {
+		_is_p1m = false;
+	}
+
+	if ((child = node.child ("IsP1Nano")) != 0) {
+		child->get_property ("value", _is_p1nano);
+	} else {
+		_is_p1nano = false;
+	}
+
 	if ((child = node.child ("IsProG2")) != 0) {
 		child->get_property ("value", _is_proG2);
 	} else {
@@ -541,6 +553,16 @@ DeviceInfo::is_v1m () const
 bool DeviceInfo::is_platformMp () const
 {
 	return _is_platformMp;
+}
+
+bool DeviceInfo::is_p1m () const
+{
+	return _is_p1m;
+}
+
+bool DeviceInfo::is_p1nano () const
+{
+	return _is_p1nano;
 }
 
 bool DeviceInfo::is_proG2 () const

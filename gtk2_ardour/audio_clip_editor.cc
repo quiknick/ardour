@@ -430,11 +430,11 @@ AudioClipEditor::position_lines ()
 		return;
 	}
 
-	double width = sample_to_pixel (_region->start().samples());
-	start_line->set (ArdourCanvas::Rect (0., 0., width, _visible_canvas_height));
+	double start_x1 = sample_to_pixel (_region->start().samples());
+	double end_x0 = start_x1 + sample_to_pixel (_region->length().samples());
 
-	double offset = sample_to_pixel ((_region->start() + _region->length()).samples());
-	end_line->set_position (ArdourCanvas::Duple (offset, 0.));
+	start_line->set (ArdourCanvas::Rect (0., 0., start_x1, _visible_canvas_height));
+	end_line->set_position (ArdourCanvas::Duple (end_x0, 0.));
 	end_line->set (ArdourCanvas::Rect (0., 0., ArdourCanvas::COORD_MAX, _visible_canvas_height));
 }
 
@@ -702,7 +702,7 @@ AudioClipEditor::set_overlay_text (std::string const & str)
 	EC_LOCAL_TEMPO_SCOPE;
 
 	if (!overlay_text) {
-		overlay_text = new ArdourCanvas::Text (data_group);
+		overlay_text = new ArdourCanvas::Text (no_scroll_group);
 		Pango::FontDescription font ("Sans 200");
 		overlay_text->set_font_description (font);
 		overlay_text->set_color (0xff000088);
@@ -789,15 +789,23 @@ AudioClipEditor::maybe_update ()
 
 			if (playing_trigger->active ()) {
 				if (playing_trigger->the_region()) {
-					_playhead_cursor->set_position (playing_trigger->current_pos().samples() + playing_trigger->the_region()->start().samples());
+
+					/* We can't know the precise sample
+					 * position because we may be
+					 * stretching. So figure out
+					 */
+					std::shared_ptr<ARDOUR::AudioTrigger> at (std::dynamic_pointer_cast<AudioTrigger> (playing_trigger));
+					if (at) {
+						const double f = playing_trigger->position_as_fraction ();
+						_playhead_cursor->set_position (playing_trigger->the_region()->start().samples() + (f * at->data_length()));
+					}
 				}
 			} else {
 				_playhead_cursor->set_position (0);
 			}
 		}
 
-#if 0
-	} else if (view->midi_region()) {
+	} else if (_region) {
 
 		/* Timeline region editor */
 
@@ -806,13 +814,13 @@ AudioClipEditor::maybe_update ()
 		}
 
 		samplepos_t pos = _session->transport_sample();
-		samplepos_t spos = view->midi_region()->source_position().samples();
+		samplepos_t spos = _region->source_position().samples();
 		if (pos < spos) {
 			_playhead_cursor->set_position (0);
 		} else {
 			_playhead_cursor->set_position (pos - spos);
 		}
-#endif
+
 	} else {
 		_playhead_cursor->set_position (0);
 	}
@@ -886,9 +894,12 @@ AudioClipEditor::snap_mode_chosen (Editing::SnapMode)
 void
 AudioClipEditor::grid_type_chosen (Editing::GridType gt)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (gt != Editing::GridTypeMinSec && grid_actions[gt] && grid_actions[gt]->get_active()) {
 		assert (grid_actions[Editing::GridTypeMinSec]);
 		grid_actions[Editing::GridTypeMinSec]->set_active (false);
 		grid_actions[Editing::GridTypeMinSec]->set_active (true);
 	}
 }
+

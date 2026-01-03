@@ -28,16 +28,13 @@
 #include <ytkmm/treestore.h>
 #include <ytkmm/treeview.h>
 
-#include "ardour/search_paths.h"
 #include "pbd/id.h"
+
+#include "ardour/search_paths.h"
+#include "ardour/session.h"
 
 #include "ardour/template_utils.h"
 #include "ardour_dialog.h"
-
-namespace ARDOUR
-{
-	class Session;
-}
 
 namespace ArdourWidgets
 {
@@ -75,7 +72,7 @@ private:
 	void prepare_mapping (bool, PBD::ID const&, std::string const&);
 	void remove_mapping (PBD::ID const&);
 	void clear_mapping ();
-	void import_all_strips ();
+	void import_all_strips (bool only_visible);
 	void set_default_mapping (bool and_idle_update);
 	void update_sensitivity_ok ();
 	void ok_activated ();
@@ -122,19 +119,18 @@ private:
 	ArdourWidgets::ArdourDropdown* _add_rid_dropdown;
 	ArdourWidgets::ArdourDropdown* _add_eid_dropdown;
 	ArdourWidgets::ArdourButton*   _add_new_mapping;
-	ArdourWidgets::ArdourButton*   _clear_mapping;
-	ArdourWidgets::ArdourButton*   _reset_mapping;
-	ArdourWidgets::ArdourButton*   _import_strips;
+	ArdourWidgets::ArdourDropdown* _action;
+	ArdourWidgets::ArdourButton*   _show_all_toggle;
 
-	bool                           _match_pbd_id;
-	std::string                    _path;
-	std::map<PBD::ID, std::string> _extern_map;
-	std::map<PBD::ID, std::string> _route_map;
-	std::map<PBD::ID, PBD::ID>     _import_map;
+	bool                       _match_pbd_id;
+	std::string                _path;
+	std::map<PBD::ID, PBD::ID> _import_map;
+
+	std::map<PBD::ID, ARDOUR::Session::RouteImportInfo> _extern_map;
+	std::map<PBD::ID, ARDOUR::Session::RouteImportInfo> _route_map;
 
 	PBD::ID _add_rid;
 	PBD::ID _add_eid;
-	bool    _default_mapping;
 
 	sigc::connection _notebook_connection;
 	sigc::connection _chooser_connection;

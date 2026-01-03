@@ -1417,11 +1417,8 @@ Editor::register_region_actions ()
 	/* Open the list editor dialogue for the selected regions */
 	register_region_action (_region_actions, RegionActionTarget (SelectedRegions), "show-region-list-editor", _("List Editor..."), sigc::mem_fun (*this, &Editor::show_midi_list_editor));
 
-	/* Open the region properties dialogue for the selected regions */
-	register_region_action (_region_actions, RegionActionTarget (SelectedRegions), "show-region-properties", _("Properties..."), sigc::mem_fun (*this, &Editor::show_region_properties));
-
 	/* Edit the region in a separate region pianoroll window */
-	register_region_action (_region_actions, RegionActionTarget (SelectedRegions), "edit-region-pianoroll-window", _("Edit in separate window..."), sigc::mem_fun (*this, &Editor::edit_region_in_pianoroll_window));
+	register_region_action (_region_actions, RegionActionTarget (SelectedRegions), "edit-region-dedicated-window", _("Edit in separate window..."), sigc::mem_fun (*this, &Editor::edit_region_in_dedicated_window));
 
 	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EnteredRegions), "play-selected-regions", _("Play Selected Regions"), sigc::mem_fun(*this, &Editor::play_selected_region));
 	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EnteredRegions), "tag-selected-regions", _("Tag Selected Regions"), sigc::mem_fun(*this, &Editor::tag_selected_region));
@@ -1621,7 +1618,13 @@ Editor::automation_move_points_later ()
 	add_command (new MementoCommand<AutomationList> (atv->line()->memento_command_binder(), &atv->line()->the_list()->get_state(), 0));
 	ControlPoint* point (points.front());
 	timepos_t model_time ((*point->model())->when);
-	model_time += Temporal::BBT_Offset (0, 1, 0);
+
+	bool success;
+	Temporal::Beats how_far (get_grid_type_as_beats (success, model_time));
+	if (!success) {
+		how_far = Temporal::Beats (1, 0);
+	}
+	model_time += Temporal::BBT_Offset (0, how_far.get_beats(), how_far.get_ticks());
 	atv->line()->the_list()->modify (point->model(), model_time, (*point->model())->value);
 	add_command (new MementoCommand<AutomationList>(atv->line()->memento_command_binder (), 0, &atv->line()->the_list()->get_state()));
 	commit_reversible_command ();
@@ -1648,7 +1651,13 @@ Editor::automation_move_points_earlier ()
 	add_command (new MementoCommand<AutomationList> (atv->line()->memento_command_binder(), &atv->line()->the_list()->get_state(), 0));
 	ControlPoint* point (points.front());
 	timepos_t model_time ((*point->model())->when);
-	model_time = model_time.earlier (Temporal::BBT_Offset (0, 1, 0));
+
+	bool success;
+	Temporal::Beats how_far (get_grid_type_as_beats (success, model_time));
+	if (!success) {
+		how_far = Temporal::Beats (1, 0);
+	}
+	model_time = model_time.earlier (Temporal::BBT_Offset (0, how_far.get_beats(), how_far.get_ticks()));
 	atv->line()->the_list()->modify (point->model(), model_time, (*point->model())->value);
 	add_command (new MementoCommand<AutomationList>(atv->line()->memento_command_binder (), 0, &atv->line()->the_list()->get_state()));
 	commit_reversible_command ();
